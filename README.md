@@ -26,13 +26,13 @@ The repository is organized for easy navigation and development:
 ```
 Freelance-Payment-Escrow/
 ├── contract/
-      ├── Cargo.lock
-      ├── Cargo.toml
-      ├── README.md
-      ├── rust-toolchain.toml
-      └── src
-         ├── lib.rs
-         └── main.rs                 # Main escrow contract in Rust (Stylus)
+│   ├── Cargo.lock              # Rust dependency lock file
+│   ├── Cargo.toml              # Rust dependencies and features
+│   ├── README.md               # Contract-specific documentation
+│   ├── rust-toolchain.toml     # Rust toolchain configuration
+│   └── src/
+│       ├── lib.rs              # Main escrow contract logic in Rust (Stylus)
+│       └── main.rs             # Contract entry point for Stylus
 ├── frontend/                   # React-based front-end application
 │   ├── src/
 │   │   ├── components/         # Reusable UI components (e.g., JobCard, WalletConnect)
@@ -50,7 +50,7 @@ Freelance-Payment-Escrow/
 └── LICENSE                     # MIT License
 ```
 
-- **contract/**: Contains the core Rust contract logic (~150 lines).
+- **contract/**: Contains the core Rust contract logic (~150 lines) and Stylus entry point.
 - **frontend/**: A simple React app with three main views (Client Dashboard, Freelancer Dashboard, Transaction History, ~300 lines).
 - **tests/**: Integration tests covering edge cases like invalid inputs and deadlines.
 - Total code: Lightweight, designed for a 24-hour prototype.
@@ -89,7 +89,7 @@ The `Escrow` contract manages these main components:
 * `deposit(freelancer: Address, duration: u64)` → Client deposits ETH for a job (payable function)
 * `release(job_id: u256)` → Client releases funds to freelancer
 * `refund(job_id: u256)` → Client refunds before deadline
-* `autoRelease(job_id: u256)` → Freelancer claims funds after deadline
+* `auto_release(job_id: u256)` → Freelancer claims funds after deadline
 
 ### Administrative Functions
 
@@ -114,6 +114,7 @@ The contract emits structured logs for monitoring:
 * `Released(job_id: u256, amount: u256)`
 * `Refunded(job_id: u256, amount: u256)`
 * `AutoReleased(job_id: u256, amount: u256)`
+* `EmergencyRefunded(job_id: u256, admin: Address)`
 * `PauseToggled(paused: bool)`
 * `OwnershipTransferred(old_admin: Address, new_admin: Address)`
 
@@ -197,15 +198,16 @@ cargo expand --all-features --release --target=wasm32-unknown-unknown
 ```
 
 ### Test Cases
-* **Deposits**: Create jobs with valid/invalid amounts and durations
+* **Deposits**: Create jobs with valid/invalid amounts, durations, and addresses
 * **Resolutions**: Test release, refund, and auto-release scenarios
-* **Timeouts**: Simulate deadline expiry and claims
-* **Admin Controls**: Test pausing, ownership transfer, emergency refunds
+* **Timeouts**: Simulate deadline expiry and freelancer claims
+* **Admin Controls**: Test pausing, ownership transfer, and emergency refunds
 * **Edge Cases**: Invalid job IDs, post-deadline refunds, unauthorized calls
-* **Events**: Confirm all expected logs are emitted
+* **Events**: Confirm all logs (`Deposited`, `Released`, etc.) are emitted correctly
 
 Run tests:
 ```bash
+cd contract
 cargo test
 ```
 
@@ -215,7 +217,7 @@ cargo test
 
 ### Smart Contract Interaction
 - **Functions**: Use the ABI (`frontend/src/abi.json`) for integration via ethers.js or similar.
-- **Events**: Query `Deposited`, `Released`, etc., for off-chain indexing and UI updates.
+- **Events**: Query `Deposited`, `Released`, `Refunded`, etc., for off-chain indexing and UI updates.
 - **Explorer**: Interact directly via [OP Sepolia Explorer](https://sepolia-optimism.etherscan.io/) using the deployed address.
 
 ### Web App Usage
@@ -240,13 +242,13 @@ cargo test
 
 **Local Testing**:
 - Simulate on OP Sepolia using test ETH.
-- Use a local node or public RPC for development.
+- Use a local node or public RPC (`https://sepolia.optimism.io`) for development.
 
 ---
 
 ## 🔒 Security Considerations
 
-* **Strict Payment Validation**: Ensures exact amounts and prevents unauthorized access
+* **Strict Payment Validation**: Ensures non-zero amounts and valid addresses
 * **Access Control**: Only clients can release/refund; freelancers claim post-deadline
 * **State Safety**: Prevents double releases, refunds after deadline, or invalid operations
 * **Timeout Protection**: Automatic resolution to avoid fund locks
