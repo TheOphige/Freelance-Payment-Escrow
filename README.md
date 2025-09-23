@@ -25,8 +25,14 @@ The repository is organized for easy navigation and development:
 
 ```
 Freelance-Payment-Escrow/
-├── src/                        # Smart contract source code
-│   └── lib.rs                  # Main escrow contract in Rust (Stylus)
+├── contract/
+      ├── Cargo.lock
+      ├── Cargo.toml
+      ├── README.md
+      ├── rust-toolchain.toml
+      └── src
+         ├── lib.rs
+         └── main.rs                 # Main escrow contract in Rust (Stylus)
 ├── frontend/                   # React-based front-end application
 │   ├── src/
 │   │   ├── components/         # Reusable UI components (e.g., JobCard, WalletConnect)
@@ -40,12 +46,11 @@ Freelance-Payment-Escrow/
 │   └── package.json            # Dependencies (react, ethers, tailwindcss)
 ├── tests/                      # Unit tests for the contract
 │   └── integration_tests.rs    # Rust-based tests (deposit, release, etc.)
-├── Cargo.toml                  # Rust dependencies and features
 ├── README.md                   # This file
 └── LICENSE                     # MIT License
 ```
 
-- **src/**: Contains the core Rust contract logic (~150 lines).
+- **contract/**: Contains the core Rust contract logic (~150 lines).
 - **frontend/**: A simple React app with three main views (Client Dashboard, Freelancer Dashboard, Transaction History, ~300 lines).
 - **tests/**: Integration tests covering edge cases like invalid inputs and deadlines.
 - Total code: Lightweight, designed for a 24-hour prototype.
@@ -137,7 +142,7 @@ The contract emits structured logs for monitoring:
 
 3. **Install contract dependencies**:
    ```bash
-   cd ..
+   cd contract
    cargo install --force cargo-stylus
    rustup target add wasm32-unknown-unknown
    ```

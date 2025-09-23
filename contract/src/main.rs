@@ -6,5 +6,5 @@ pub extern "C" fn main() {}
 
 #[cfg(feature = "export-abi")]
 fn main() {
-    stylus_hello_world::print_from_args();
+    freelance_payment_escrow::print_from_args();
 }
