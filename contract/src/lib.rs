@@ -1,7 +1,7 @@
 extern crate alloc;
 
 use stylus_sdk::prelude::*;
-use alloy_primitives::{U256, Address};
+use alloy_primitives::{U256, Address, Uint};
 use alloy_sol_types::sol;
 
 sol_storage! {
@@ -36,6 +36,7 @@ impl Escrow {
     }
 
     /// Client deposits ETH for a job
+    #[payable]
     pub fn deposit(&mut self, freelancer: Address, duration: u64) -> Result<U256, Vec<u8>> {
         if self.paused.get() {
             return Err("Escrow is paused".as_bytes().to_vec());
@@ -53,14 +54,16 @@ impl Escrow {
         let new_id = self.job_count.get() + U256::from(1);
         let client = self.vm().msg_sender();
         let amount = self.vm().msg_value();
-        let deadline = self.vm().block_timestamp() + duration;
+        let timestamp = self.vm().block_timestamp();
+        let deadline = timestamp + duration;
+        let deadline_uint = Uint::<64, 1>::from(deadline);
 
         let mut job = self.jobs.setter(new_id);
         job.job_id.set(new_id);
         job.client.set(client);
         job.freelancer.set(freelancer);
         job.amount.set(amount);
-        job.deadline.set(deadline);
+        job.deadline.set(deadline_uint);
         job.released.set(false);
         job.refunded.set(false);
 
@@ -90,6 +93,9 @@ impl Escrow {
         if job.released.get() || job.refunded.get() {
             return Err("Job already settled".as_bytes().to_vec());
         }
+        if self.finalized.get(job_id) {
+            return Err("Job already finalized".as_bytes().to_vec());
+        }
 
         let amount = job.amount.get();
         let freelancer = job.freelancer.get();
@@ -97,7 +103,7 @@ impl Escrow {
         self.jobs.setter(job_id).released.set(true);
         self.finalized.setter(job_id).set(true);
 
-        let _ = self.vm().call_contract(freelancer, amount, &[])?;
+        self.vm().transfer_eth(freelancer, amount)?;
 
         log(self.vm(), Released {
             job_id,
@@ -120,7 +126,10 @@ impl Escrow {
         if job.released.get() || job.refunded.get() {
             return Err("Job already settled".as_bytes().to_vec());
         }
-        if self.vm().block_timestamp() >= job.deadline.get() {
+        if self.finalized.get(job_id) {
+            return Err("Job already finalized".as_bytes().to_vec());
+        }
+        if self.vm().block_timestamp() >= job.deadline.get().to() {
             return Err("Deadline passed".as_bytes().to_vec());
         }
 
@@ -130,7 +139,7 @@ impl Escrow {
         self.jobs.setter(job_id).refunded.set(true);
         self.finalized.setter(job_id).set(true);
 
-        let _ = self.vm().call_contract(client, amount, &[])?;
+        self.vm().transfer_eth(client, amount)?;
 
         log(self.vm(), Refunded {
             job_id,
@@ -153,7 +162,10 @@ impl Escrow {
         if job.released.get() || job.refunded.get() {
             return Err("Job already settled".as_bytes().to_vec());
         }
-        if self.vm().block_timestamp() < job.deadline.get() {
+        if self.finalized.get(job_id) {
+            return Err("Job already finalized".as_bytes().to_vec());
+        }
+        if self.vm().block_timestamp() < job.deadline.get().to() {
             return Err("Deadline not reached".as_bytes().to_vec());
         }
 
@@ -163,7 +175,7 @@ impl Escrow {
         self.jobs.setter(job_id).released.set(true);
         self.finalized.setter(job_id).set(true);
 
-        let _ = self.vm().call_contract(freelancer, amount, &[])?;
+        self.vm().transfer_eth(freelancer, amount)?;
 
         log(self.vm(), AutoReleased {
             job_id,
@@ -217,6 +229,9 @@ impl Escrow {
         if job.released.get() || job.refunded.get() {
             return Err("Job already settled".as_bytes().to_vec());
         }
+        if self.finalized.get(job_id) {
+            return Err("Job already finalized".as_bytes().to_vec());
+        }
 
         let amount = job.amount.get();
         let client = job.client.get();
@@ -224,7 +239,7 @@ impl Escrow {
         self.jobs.setter(job_id).refunded.set(true);
         self.finalized.setter(job_id).set(true);
 
-        let _ = self.vm().call_contract(client, amount, &[])?;
+        self.vm().transfer_eth(client, amount)?;
 
         log(self.vm(), EmergencyRefunded {
             job_id,
@@ -242,7 +257,7 @@ impl Escrow {
             j.client.get(),
             j.freelancer.get(),
             j.amount.get(),
-            j.deadline.get(),
+            j.deadline.get().to(),
             j.released.get(),
             j.refunded.get(),
         )
