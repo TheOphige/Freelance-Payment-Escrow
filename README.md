@@ -177,7 +177,9 @@ The contract emits structured logs for monitoring:
    - No constructor arguments are required.
    - Update `frontend/src/App.js` with the deployed contract address.
 
-**Deployed Address**: `0x1234567890AbCdEf1234567890AbCdEf12345678` (Hypothetical; replace with actual address on [OP Sepolia Explorer](https://sepolia-optimism.etherscan.io/address/0x1234567890AbCdEf1234567890AbCdEf12345678)).
+**Deployed Address**: `0xb08e107a52d02bb4a95da6a20015803c80f3e58a`
+**deployment tx hash**: `0x4a2d9220a2ff8ed1843c99fd9f0548efe6b489f8cd6880b3dca0bccedd273a68`
+**contract activated and ready onchain with tx hash**: `0x67da9f38366058aa259f093fbc6f7a2d47965eb68aa763e088ad091026e8c45f`
 
 8. **Start the front-end**:
    ```bash
