@@ -126,12 +126,12 @@ The contract emits structured logs for monitoring:
 - Node.js (v18+)
 - Rust (for Stylus CLI)
 - MetaMask or similar wallet (configured for OP Sepolia)
-- Test ETH (from [Superchain Faucet](https://www.superchain.app/faucet) or [QuickNode Optimism Faucet](https://faucet.quicknode.com/optimism))
+- Test ETH 
 
 ### Installation Steps
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/Freelance-Payment-Escrow.git
+   git clone https://github.com/TheOphige/Freelance-Payment-Escrow.git
    cd Freelance-Payment-Escrow
    ```
 
@@ -242,9 +242,7 @@ cargo test
 - Client clicks "Release Funds" to transfer ETH.
 - If client ignores, freelancer claims funds after 7 days via "Claim Funds".
 
-**Local Testing**:
-- Simulate on OP Sepolia using test ETH.
-- Use a local node or public RPC (`https://sepolia.optimism.io`) for development.
+
 
 ---
 
@@ -262,9 +260,9 @@ cargo test
 ---
 
 ## Contributors
-- **Your Name/Username**: Lead Developer (Smart Contract & Front-End)
-- **Grok (xAI)**: AI Assistant for ideation, code snippets, and UI design guidance
-- Open to contributions! Fork and submit PRs for improvements (e.g., multi-currency support, enhanced UI).
+- Theophilus Ige
+- Gbangbola Oluwagbemiga Philip
+- Ayooluwa Oyewo
 
 ---
 
@@ -275,7 +273,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 - Inspired by DeFi escrow patterns (e.g., OpenZeppelin contracts)
-- Built as a 24-hour project demo on September 23, 2025
-- Thanks to the Optimism and Stylus communities for documentation and tools
-
-For issues or suggestions, open a GitHub issue. Happy freelancing! 🚀
