@@ -32,6 +32,10 @@ mini-alloc = ["stylus-sdk/mini-alloc"]
 name = "freelance-payment-escrow"
 path = "src/main.rs"
 
+[[bin]]
+name = "compute_event_hashes"
+path = "src/compute_event_hashes.rs"
+
 [lib]
 crate-type = ["lib", "cdylib"]
 
